@@ -153,5 +153,5 @@ countystats <- Reduce(function(x, y) merge(x, y, by = c("FIPS"), all = TRUE), li
 countystats <- select(countystats, FIPS, Population, HS, BAorHigher, Owner_Occupied, Uninsured, Poverty, MetroArea, Unemployment, HHIncome_med, HHInc_PercStateTotal, Rural_Urban, UrbanInfCode, EconType, Male, WhiteAlone, BlackAlone, AsianAlone, Hispanic, Multiple)
 
 # write csv
-write.csv(countystats, "/Users/mikaelaspringsteen/Desktop/counting-covid19-TEST/countystats.csv", row.names = FALSE)
+write.csv(countystats, "countystats.csv", row.names = FALSE)
 rm(list=ls())

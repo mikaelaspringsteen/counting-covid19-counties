@@ -43,7 +43,7 @@ ui <- dashboardPage(
                     headerText = tags$i("Questions? Suggestions? Want to request", tags$br(), 
                                         "a stat be added to the app? Get in touch at", tags$br(),
                                         "contactmspringsteen@gmail.com")),
-                  tags$li(a("ABOUT THIS APP", href = ""), class = "dropdown")),
+                  tags$li(a("ABOUT THIS APP", href = "https://github.com/mikaelaspringsteen/counting-covid19-counties"), class = "dropdown")),
   # sidebar
   dashboardSidebar(
     useShinyjs(),
@@ -325,7 +325,7 @@ server <- function(input, output, session) {
   observeEvent("", {
     showModal(modalDialog(
       easyClose = TRUE,
-      title = tags$b("Counting Covid-19"),
+      title = tags$b("Counting Covid-19: US Counties"),
       tags$b("What we know about the infection or death rate of Covid-19 depends on one thing:"),
       tags$br(),
       tags$b("how good are we at counting the people who have Covid-19?"),
@@ -340,7 +340,7 @@ server <- function(input, output, session) {
       tags$b("Exploring what characteristics are associated with increased testing, lower case rates, or lower case fatality rates might help explain what makes some areas better at counting cases of Covid-19 than others."),
       tags$br(),
       tags$hr(),
-      tags$b(tags$i("Please note: this app is based on a very large dataset, and the graphs may take some time to load.")),
+      tags$b(tags$i("Please note: this app is based on a large dataset, and the graphs may take some time to load.")),
       tags$br(),
       tags$hr(),
       tags$i("For information about combating the spread of the virus, or about symptoms and treatment, there are a number of excellent resources run by infectious disease experts and medical professionals, including the ", tags$a(href = "https://www.who.int/emergencies/diseases/novel-coronavirus-2019", "WHO"), "and ", tags$a(href = "https://www.cdc.gov/coronavirus/2019-nCoV/index.html", "CDC"), "for public health information, the ", tags$a(href = "https://www.nih.gov/health-information/coronavirus", "NIH"), "and ", tags$a(href = "https://www.gisaid.org/", "GISAID"), "for research information, and ", tags$a(href = "https://gisanddata.maps.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6", "JHU"), "for data."),
