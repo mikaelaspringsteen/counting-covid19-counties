@@ -285,7 +285,9 @@ ui <- dashboardPage(
     introBox(data.step = 4, data.intro = "Switch between tabs to see different Covid-19 metrics. A description of the graph is located below each panel.",
     tabsetPanel(
       tabPanel("Cases",
-               fluidRow(column(12, uiOutput("cases_graph"))),
+               introBox(data.step = 5, data.intro = "Each graph is interactive. Hover over points/lines for more information, or find more settings (including a home button to reset axes) at the top right of each graph. Double click on the name of a county (to the right of the graph) to highlight only that county.",
+               fluidRow(column(12, uiOutput("cases_graph")))
+               ),
                tags$br(),
                tags$br(),
                tags$br(),
