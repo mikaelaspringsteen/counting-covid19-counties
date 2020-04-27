@@ -5,8 +5,8 @@ account: mspringsteen
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2138585
-bundleId: 3040602
+bundleId: 3069776
 url: https://mspringsteen.shinyapps.io/counting-covid19-counties/
-when: 1587412558.38562
+when: 1587958674.96337
 asMultiple: FALSE
 asStatic: FALSE

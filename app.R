@@ -43,7 +43,7 @@ ui <- dashboardPage(
                     headerText = tags$i("Questions? Suggestions? Want to request", tags$br(), 
                                         "a stat be added to the app? Get in touch at", tags$br(),
                                         "contactmspringsteen@gmail.com")),
-                  tags$li(a("ABOUT THIS APP", href = "https://github.com/mikaelaspringsteen/counting-covid19-counties"), class = "dropdown")),
+                  tags$li(a("ABOUT THIS APP", href = "https://github.com/mikaelaspringsteen/counting-covid19-counties/blob/master/README.md"), class = "dropdown")),
   # sidebar
   dashboardSidebar(
     useShinyjs(),
@@ -54,7 +54,7 @@ ui <- dashboardPage(
     h5("several to visualize their impact on" , align = "center"),
     h5("tracking the spread of the virus.", align = "center"),
     tags$hr(),
-    introBox(data.step = 3, data.intro = "Click here to update graphs with your selections.",
+    introBox(data.step = 3, data.intro = "Click here to update graphs with your selections or to reset any highlights set from the controls to the right of the graph.",
     fluidRow(
       column(1, offset = 3,
       actionButton("updategraph", tags$b("Update graph"))
@@ -63,7 +63,7 @@ ui <- dashboardPage(
     ),
     introBox(data.step = 2, data.intro = "Selecting variables here will highlight any counties on the graph which match those characteristics.",
     sidebarMenu(
-      introBox(data.step = 1, data.intro = "Select those states you wish to analyze. To isolate the course of the virus in specific counties, double click on the name to the right of the graph. WARNING: increasing the number of states selected will increase the time to load the graph.",
+      introBox(data.step = 1, data.intro = "Select states here. You may also isolate the course of the virus in specific counties by double clicking on the county name to the right of the graph. WARNING: increasing the number of states selected will increase the time to load the graph.",
       uiOutput("states")
       ),
       menuItem("Population statistics", tabName = "populationstatistics",
@@ -285,7 +285,7 @@ ui <- dashboardPage(
     introBox(data.step = 4, data.intro = "Switch between tabs to see different Covid-19 metrics. A description of the graph is located below each panel.",
     tabsetPanel(
       tabPanel("Cases",
-               introBox(data.step = 5, data.intro = "Each graph is interactive. Hover over points/lines for more information, or find more settings (including a home button to reset axes) at the top right of each graph. Double click on the name of a county (to the right of the graph) to highlight only that county.",
+               introBox(data.step = 5, data.intro = "Each graph is interactive. Hover over points/lines for more information, or find more settings (including a home button to reset axes) at the top right of each graph.",
                fluidRow(column(12, uiOutput("cases_graph")))
                ),
                tags$br(),
@@ -299,7 +299,7 @@ ui <- dashboardPage(
                tags$br(),
                tags$br(),
                tags$br(),
-               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all counties, and the blue dotted line represents the mean for the highlighted counties. To interpret the number of cases, raise 10 to the number displayed when hovering over the line (10 ^ that number). The light band around these lines represents the standard error.", tags$br(),"This number has been scaled to represent the number of confirmed cases for every 100,000 people in each county, in order to simplify comparison betweeen counties.", tags$br(), "If a state is not testing many people, this number is probably lower than that state's actual infection rate, as a large number of mild cases may go undetected.")))
+               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all counties. The blue represents the mean for the highlighted counties. The light bands represent standard error.", tags$br(),"Cases have been scaled to represent the number of confirmed cases for every 100,000 people in each country, to simplify comparison betweeen counties.", tags$br(), "If a county is not testing many people, this number is probably lower than that county's actual infection rate as mild cases go undetected.")))
       ),
       tabPanel("Deaths",
                fluidRow(column(12, uiOutput("case_fatality_graph"))),
@@ -314,7 +314,7 @@ ui <- dashboardPage(
                tags$br(),
                tags$br(),
                tags$br(),
-               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all counties, and the blue dotted line represents the mean for the highlighted counties. To interpret the death rate, raise 10 to to the number displayed when hovering over the line (10 ^ that number). The light band around these lines represents the standard error.", tags$br(),"Also known as the 'case fatality rate', this number is calculated by dividing the number of detected cases by the number of reported deaths.", tags$br(), "If a state is not testing a lot of people this number may be artifically high, as a large number of mild cases could go undetected. Confirmed cases may therefore represent the most severe cases—which are more likely to result in a death. If a state is not accurately recording Covid-19 deaths the case fatality rate may be artificially low for that state.")))
+               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all counties. The blue represents the mean for the highlighted counties. The light bands represent standard error.", tags$br(), "Also known as the 'case fatality rate' (or CFR), this number is calculated by dividing the number of detected cases by the number of reported deaths.", tags$br(), "If a county is not testing many people the CFR may be artifically high as mild cases go undetected. Inaccurately recording Covid-19 deaths may result in an artificially low CFR.")))
       )
     )
     )
@@ -328,6 +328,9 @@ server <- function(input, output, session) {
     showModal(modalDialog(
       easyClose = TRUE,
       title = tags$b("Counting Covid-19: US Counties"),
+      tags$b(tags$i("Please note: this app is based on a very large dataset, and the graphs will take some time to load. Adding states to the graph will further increase load times. Please be patient.")),
+      tags$br(),
+      tags$hr(),
       tags$b("What we know about the infection or death rate of Covid-19 depends on one thing:"),
       tags$br(),
       tags$b("how good are we at counting the people who have Covid-19?"),
@@ -340,9 +343,6 @@ server <- function(input, output, session) {
       tags$br(),
       tags$br(),
       tags$b("Exploring what characteristics are associated with increased testing, lower case rates, or lower case fatality rates might help explain what makes some areas better at counting cases of Covid-19 than others."),
-      tags$br(),
-      tags$hr(),
-      tags$b(tags$i("Please note: this app is based on a large dataset, and the graphs may take some time to load.")),
       tags$br(),
       tags$hr(),
       tags$i("For information about combating the spread of the virus, or about symptoms and treatment, there are a number of excellent resources run by infectious disease experts and medical professionals, including the ", tags$a(href = "https://www.who.int/emergencies/diseases/novel-coronavirus-2019", "WHO"), "and ", tags$a(href = "https://www.cdc.gov/coronavirus/2019-nCoV/index.html", "CDC"), "for public health information, the ", tags$a(href = "https://www.nih.gov/health-information/coronavirus", "NIH"), "and ", tags$a(href = "https://www.gisaid.org/", "GISAID"), "for research information, and ", tags$a(href = "https://gisanddata.maps.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6", "JHU"), "for data."),
@@ -370,7 +370,7 @@ server <- function(input, output, session) {
     pickerInput(
       inputId = "statesinput", label = h5("Select states to include in plot"), 
       choices = sort(stateslist), 
-      selected = c("New York", "New Jersey", "Michigan", "Illinois", "California", "Florida"),
+      selected = c("New York", "Michigan", "California"),
       multiple = TRUE, 
       options = list(`actions-box` = TRUE)
     )
@@ -796,8 +796,10 @@ server <- function(input, output, session) {
       with_options(list(digits = 1),
       ggplotly(
       ggplot(selected_covid_case()) +
-      geom_line(data = min_covid_case(), aes(x = Day, y = Cases, group = County), color = "#bdc3c7", show.legend = FALSE) +
-      geom_line(aes(x = Day, y = Cases, color = County, group = County), show.legend = FALSE) +
+      geom_line(data = min_covid_case(), aes(x = Day, y = Cases, group = County,
+                                             text = paste(County, "<br>Day: ", Day, "<br>Cases: ", round(Cases, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
+      geom_line(aes(x = Day, y = Cases, color = County, group = County,
+                    text = paste(County, "<br>Day: ", Day, "<br>Cases: ", round(Cases, digits = 1))), show.legend = FALSE) +
       geom_smooth(aes(x = Day, y = Cases), data = min_covid_case(),
         method = "loess", se = FALSE, color = "#bdc3c7", size = .5, alpha = .6, linetype = "dotted") +
       geom_ribbon(aes(x = Day, y = Cases), data = min_covid_case(),
@@ -807,7 +809,7 @@ server <- function(input, output, session) {
       geom_ribbon(aes(x = Day, y = Cases),
         stat = "smooth", method = "loess", alpha = .15) +
       labs(
-        title = "How many people, that we know of, have Covid-19?",
+        title = "Confirmed Covid-19 cases",
         x = "Days from 50th in-state case", y = "Detected cases per 100,000 people") +
       scale_x_continuous(expand = c(0, 0)) +
       scale_y_log10(expand = c(0, 0)) +
@@ -825,7 +827,7 @@ server <- function(input, output, session) {
         axis.line.x = element_line(colour = "#908f85"),
         plot.margin = unit(c(2, 1, 2, 1), "lines")),
       height = 600,
-      tooltip = c("text", "x", "y", "group")
+      tooltip = "text"
       )
       )
   })
@@ -852,8 +854,10 @@ server <- function(input, output, session) {
       with_options(list(digits = 1),
       ggplotly(
       ggplot(selected_covid_case()) +
-      geom_line(data = min_covid_case(), aes(x = Day, y = DeathRate, group = County), color = "#bdc3c7", show.legend = FALSE) +
-      geom_line(aes(x = Day, y = DeathRate, color = County), show.legend = FALSE) +
+      geom_line(data = min_covid_case(), aes(x = Day, y = DeathRate, group = County,
+                                             text = paste(County, "<br>Day: ", Day, "<br>Death Rate: ", paste(round(100*DeathRate, 2), "%", sep = ""))), color = "#bdc3c7", show.legend = FALSE) +
+      geom_line(aes(x = Day, y = DeathRate, color = County, group = County,
+                    text = paste(County, "<br>Day: ", Day, "<br>Death Rate: ", paste(round(100*DeathRate, 2), "%", sep = ""))), show.legend = FALSE) +
       geom_smooth(aes(x = Day, y = DeathRate), data = min_covid_case(),
                     method = "loess", se = FALSE, color = "#bdc3c7", size = .5, alpha = .6, linetype = "dotted") +
       geom_ribbon(aes(x = Day, y = DeathRate), data = min_covid_case(),
@@ -863,7 +867,7 @@ server <- function(input, output, session) {
       geom_ribbon(aes(x = Day, y = DeathRate),
                     stat = "smooth", method = "loess", alpha = .15) +
       labs(
-        title = list(text = paste0("Of the people that we know have Covid-19, what percent have died?", "<br>", "<sup>",
+        title = list(text = paste0("Reported Covid-19 death rate", "<br>", "<sup>",
                                    "","<sup>")),
         x = "Days from 50th in-state case", y = "Percent of detected cases resulting in a death") +
       scale_x_continuous(expand = c(0, 0)) +

@@ -12,7 +12,7 @@ Remember that visualizations like this can often tell us more about a region's t
 
 Questions, suggestions, or requests for additional stats or functionalities to be added to the app can be directed to contactmspringsteen@gmail.com
 
-COVID-19 data is updated regularly to reflect any updates to [JHU's repository](https://github.com/CSSEGISandData).
+The app is updated daily to reflect changes to the underlying data.
 
 ## Data
 
