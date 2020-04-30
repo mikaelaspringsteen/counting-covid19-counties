@@ -30,6 +30,7 @@ covid_cases <- read.csv("covid_cases_usa.csv")
 covid_cases <- select(covid_cases, -County)
 covid_cases$County <- covid_cases$Combined_Key
 covid_cases$Cases <- covid_cases$Totalper100_000
+covid_cases$Cases_actual <- (covid_cases$Cases/100000)*covid_cases$Population
 
 # Shiny ui
 ui <- dashboardPage(
@@ -284,9 +285,9 @@ ui <- dashboardPage(
     ),
     introBox(data.step = 4, data.intro = "Switch between tabs to see different Covid-19 metrics. A description of the graph is located below each panel.",
     tabsetPanel(
-      tabPanel("Cases",
+      tabPanel("Total Cases",
                introBox(data.step = 5, data.intro = "Each graph is interactive. Hover over points/lines for more information, or find more settings (including a home button to reset axes) at the top right of each graph.",
-               fluidRow(column(12, uiOutput("cases_graph")))
+                        fluidRow(column(12, uiOutput("cases_graph")))
                ),
                tags$br(),
                tags$br(),
@@ -301,7 +302,7 @@ ui <- dashboardPage(
                tags$br(),
                fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all counties. The blue represents the mean for the highlighted counties. The light bands represent standard error.", tags$br(),"Cases have been scaled to represent the number of confirmed cases for every 100,000 people in each country, to simplify comparison betweeen counties.", tags$br(), "If a county is not testing many people, this number is probably lower than that county's actual infection rate as mild cases go undetected.")))
       ),
-      tabPanel("Deaths",
+      tabPanel("Death Rate",
                fluidRow(column(12, uiOutput("case_fatality_graph"))),
                tags$br(),
                tags$br(),
@@ -370,14 +371,14 @@ server <- function(input, output, session) {
     pickerInput(
       inputId = "statesinput", label = h5("Select states to include in plot"), 
       choices = sort(stateslist), 
-      selected = c("New York", "Michigan", "California"),
+      selected = c("New York"),
       multiple = TRUE, 
       options = list(`actions-box` = TRUE)
     )
   })
   # create minimal dataset
   min_covid_case <- reactive({
-    select(covid_cases, State, County, Date, Day, Cases, DeathRate) %>%
+    select(covid_cases, State, County, Date, Day, Cases, DeathRate, Cases_actual) %>%
       filter(State %in% input$statesinput)
   })
   # enable inputs if variable is checked
@@ -749,7 +750,7 @@ server <- function(input, output, session) {
     multiplefilter <- quote(between(Multiple, as.numeric(input$multipleinput[1]), as.numeric(input$multipleinput[2])))
     covid_cases %>%
       select(
-        State, County, Date, Day, Cases, DeathRate, EconType, MetroArea, UrbanInfCode,
+        State, County, Date, Day, Cases, DeathRate, EconType, MetroArea, UrbanInfCode, Cases_actual,
         if (input$popcheck == FALSE) {"State"} else {"Population_hundthou"},
         if (input$hscheck == FALSE) {"State"} else {"HS"},
         if (input$bacheck == FALSE) {"State"} else {"BAorHigher"},
@@ -786,6 +787,64 @@ server <- function(input, output, session) {
         if (is.null(input$urbinfinput)) {!is.na(State)} else {UrbanInfCode %in% input$urbinfinput}
       )
   })
+  # new cases graph
+  newcases_plot <- reactive({
+    validate(
+      need(input$statesinput != "", "Please select at least 1 state from the dropdown to the left."))
+    validate(
+      need(try(select(selected_covid_case(), State) != ""), "There are no counties matching the selected criteria.\nPlease select fewer variables, adjust the range of those already selected, or add additional states from the dropdown to the left."))
+    plot <- 
+      with_options(list(digits = 1),
+                   ggplotly(
+                     ggplot(selected_covid_case()) +
+                       geom_line(data = min_covid_case(), aes(x = Day, y = NewCases, group = County,
+                                                              text = paste(County, "<br>Day: ", Day, "<br>New Cases: ", round(NewCases, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
+                       geom_line(aes(x = Day, y = NewCases, color = County, group = County,
+                                     text = paste(County, "<br>Day: ", Day, "<br>New Cases: ", round(NewCases, digits = 1))), show.legend = FALSE) +
+                       geom_smooth(aes(x = Day, y = NewCases), data = min_covid_case(),
+                                   method = "loess", se = FALSE, color = "#bdc3c7", size = .5, alpha = .6, linetype = "dotted") +
+                       geom_ribbon(aes(x = Day, y = NewCases), data = min_covid_case(),
+                                   stat = "smooth", method = "loess", alpha = .15) +
+                       geom_smooth(aes(x = Day, y = NewCases),
+                                   method = "loess", se = FALSE, color = "#3c8dbc", size = .5, alpha = .6, linetype = "dotted") +
+                       geom_ribbon(aes(x = Day, y = NewCases),
+                                   stat = "smooth", method = "loess", alpha = .15) +
+                       labs(
+                         title = "New confirmed Covid-19 cases ('The Curve')",
+                         x = "Days from 50th in-state case", y = "New cases per 100,000 people") +
+                       scale_x_continuous(expand = c(0, 0)) +
+                       scale_y_log10(expand = c(0, 0)) +
+                       theme(text = element_text(family = "Georgia"),
+                             panel.background = element_rect(fill = "#f7f5f0", colour = "#f7f5f0"),
+                             plot.title = element_text(face = "italic"),
+                             plot.subtitle = element_text(face = "italic"),
+                             axis.title = element_text(face = "italic"),
+                             plot.caption = element_text(face = "italic"),
+                             panel.grid.major = element_line(colour = "#D5D3CC", size = rel(.5)), 
+                             panel.grid.major.x = element_blank(),
+                             panel.grid.minor = element_blank(), 
+                             axis.ticks = element_blank(),
+                             axis.text.x = NULL,
+                             axis.line.x = element_line(colour = "#908f85"),
+                             plot.margin = unit(c(2, 1, 2, 1), "lines")),
+                     height = 600,
+                     tooltip = "text"
+                   )
+      )
+  })
+  output$newcases_plot <- renderPlotly({
+    input$updategraph
+    isolate({
+      newcases_plot()
+    })
+  })
+  output$newcases_graph <- renderUI({
+    withSpinner(
+      plotlyOutput("newcases_plot"),
+      type = 1,
+      color = "#3c8dbc"
+    )
+  })
   # cases graph
   cases_plot <- reactive({
     validate(
@@ -797,9 +856,9 @@ server <- function(input, output, session) {
       ggplotly(
       ggplot(selected_covid_case()) +
       geom_line(data = min_covid_case(), aes(x = Day, y = Cases, group = County,
-                                             text = paste(County, "<br>Day: ", Day, "<br>Cases: ", round(Cases, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
+                                             text = paste(County, "<br>Day: ", Day, "<br>Cases (scaled): ", round(Cases, digits = 1), "<br>Cases (actual): ", round(Cases_actual, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
       geom_line(aes(x = Day, y = Cases, color = County, group = County,
-                    text = paste(County, "<br>Day: ", Day, "<br>Cases: ", round(Cases, digits = 1))), show.legend = FALSE) +
+                    text = paste(County, "<br>Day: ", Day, "<br>Cases (scaled): ", round(Cases, digits = 1), "<br>Cases (actual): ", round(Cases_actual, digits = 1))), show.legend = FALSE) +
       geom_smooth(aes(x = Day, y = Cases), data = min_covid_case(),
         method = "loess", se = FALSE, color = "#bdc3c7", size = .5, alpha = .6, linetype = "dotted") +
       geom_ribbon(aes(x = Day, y = Cases), data = min_covid_case(),
@@ -885,7 +944,8 @@ server <- function(input, output, session) {
             axis.text.x = NULL,
             axis.line.x = element_line(colour = "#908f85"),
             plot.margin = unit(c(2, 1, 2, 1), "lines")),
-      height = 600
+      height = 600,
+      tooltip = "text"
       )
       )
   })

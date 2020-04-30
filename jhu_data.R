@@ -147,6 +147,9 @@ covid_cases_usa <- covid_cases_usa %>% group_by(Combined_Key) %>% mutate(NewCase
 # add NewDeaths variable
 covid_cases_usa <- covid_cases_usa %>% group_by(Combined_Key) %>% mutate(NewDeaths = Deaths - lag(Deaths, default = first(Deaths)))
 
+# add NewCases variable to per 100,000 people scale
+covid_cases_usa$NewCases <- (covid_cases_usa$NewCases/covid_cases_usa$Population)*100000
+
 # add Totalper100_000 variable
 covid_cases_usa$Totalper100_000 <- (covid_cases_usa$Total/covid_cases_usa$Population)*100000
 
@@ -175,7 +178,7 @@ covid_cases_usa <- filter(covid_cases_usa, County != "Out of UT")
 covid_cases_usa <- covid_cases_usa %>% drop_na(Day)
 
 # restructuring for app
-covid_cases_usa <- select(covid_cases_usa, -FIPS, -DayCount, -NewCases, -NewDeaths)
+covid_cases_usa <- select(covid_cases_usa, -FIPS, -DayCount, -NewDeaths)
 
 # write csv
 write.csv(covid_cases_usa, "covid_cases_usa.csv", row.names = FALSE)
